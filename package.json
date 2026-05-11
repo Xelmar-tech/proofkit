@@ -8,7 +8,9 @@
     "build": "turbo build",
     "test": "turbo test",
     "check-types": "turbo check-types",
-    "check": "oxlint && oxfmt --write",
+    "check": "oxlint && oxfmt --check",
+    "format": "oxfmt --write",
+    "prepare": "lefthook install",
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release": "turbo build && changeset publish"
@@ -20,6 +22,7 @@
   "devDependencies": {
     "@changesets/cli": "^2.31.0",
     "@tui-proof-kit/config": "workspace:*",
+    "lefthook": "^1.13.6",
     "oxfmt": "^0.46.0",
     "oxlint": "^1.61.0",
     "turbo": "^2.8.12",
