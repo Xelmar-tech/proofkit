@@ -1,0 +1,108 @@
+---
+title: Architecture
+description: How tui-proof-kit works under the hood — PTY driver, virtual screen, snapshot engine, and report renderer.
+icon: Cpu
+---
+
+## Layer diagram
+
+```
+┌───────────────────────────────────────────┐
+│  defineProof(config).run(spec)            │  ← Public API
+├───────────────────────────────────────────┤
+│  proof.ts    orchestration + report gen   │
+├──────────────┬────────────────────────────┤
+│  driver.ts   │  snapshot.ts               │
+│  (PTY +      │  (compare-or-write         │
+│   xterm)     │   golden frames)           │
+├──────────────┼────────────────────────────┤
+│  cast.ts     │  report.ts                 │
+│  (asciinema  │  (HTML template)           │
+│   v2 writer) │                            │
+├──────────────┴────────────────────────────┤
+│  keystrokes.ts   (VT100 key sequences)    │
+├───────────────────────────────────────────┤
+│  node-pty  │  @xterm/headless             │  ← Native deps
+│  (PTY I/O) │  (virtual screen model)      │
+└───────────────────────────────────────────┘
+```
+
+## Driver (`driver.ts`)
+
+The driver owns the **real PTY** and the **virtual screen model**:
+
+```ts
+// Simplified — see driver.ts for full implementation
+const pty = nodePty.spawn(command, args, { cols, rows, cwd, env });
+const terminal = new Terminal({ cols, rows });
+
+pty.onData((data) => terminal.write(data)); // PTY output → xterm
+```
+
+- **`node-pty`** spawns a real child process with a pseudo-terminal. The TUI thinks it's connected to a real terminal. All stdout/stderr, ANSI escape codes, cursor movements, and color sequences pass through the PTY.
+- **`@xterm/headless`** is xterm.js minus the DOM rendering. It parses ANSI sequences and maintains a virtual screen buffer (a 2D grid of styled characters). This is the same engine Chrome's DevTools terminal, VS Code's integrated terminal, and Hyper use — we just skip the DOM paint step and read the buffer directly.
+
+### Why `@xterm/headless` (ADR decision)
+
+We evaluated four approaches: raw PTY output capture (loses formatting), screenshot-based (fragile, OS-dependent), custom ANSI parser (high maintenance), and `@xterm/headless`. The xterm option won because:
+
+- It handles edge cases we'd spend months debugging (cursor positioning, line wrapping, scroll regions, SGR attributes).
+- It's maintained by a team that already solved these problems for millions of users.
+- `Terminal.buffer.active` gives us a cell-by-cell view of the screen that we can serialize to text for snapshots and diff against.
+
+## Snapshots (`snapshot.ts`)
+
+The snapshot engine does one thing: `compareOrWrite(id, frame, dir, update)`.
+
+```ts
+// Simplified interface
+function compareOrWrite(
+  id: string,
+  frame: string,
+  snapshotDir: string,
+  update: boolean
+): { status: "match" | "mismatch" | "wrote"; path: string; ... }
+```
+
+- **Write mode** (`update === true`): saves `frame` to `dir/<id>.txt`, returns `{ status: "wrote" }`.
+- **Compare mode**: reads `dir/<id>.txt`, compares byte-by-byte with `frame`.
+  - Match → `{ status: "match" }`.
+  - Mismatch → `{ status: "mismatch", expected, actual }`.
+
+The comparison is **byte-level**, not fuzzy. This is intentional — terminal output is structured (character + grid position), not natural language. A byte difference means the TUI output changed, which is exactly what we want to catch.
+
+## Cast recorder (`cast.ts`)
+
+Writes [asciinema v2 format](https://docs.asciinema.org/manual/asciicast/v2/) cast files as the PTY produces output:
+
+```ts
+// Each event: [time_offset, event_type, data]
+writer.write(JSON.stringify([elapsed, "o", chunk]) + "\n");
+```
+
+The cast file is embedded inline in the HTML report (base64-encoded) so the asciinema player can replay without needing a file fetch. This makes reports self-contained — shareable as a single `.html` file.
+
+## Report renderer (`report.ts`)
+
+Generates a self-contained HTML file that includes:
+
+- **Findings table** — every `ctx.finding(...)` call rendered as pass/fail/info rows.
+- **Snapshot diffs** — side-by-side comparison for mismatched snapshots.
+- **Cast player** — embedded asciinema player with the full terminal recording.
+- **Result summary** — pass/fail/blocked banner at the top.
+
+The HTML is built as a template literal with inline CSS and the asciinema player bundled. No external assets, no CDN dependencies — the report file works offline.
+
+## Keystroke translator (`keystrokes.ts`)
+
+Maps semantic key names (`"Enter"`, `"Down"`, etc.) to VT100 escape sequences that `node-pty` writes to the child process's stdin:
+
+```ts
+// Examples
+"Enter"     → "\r"
+"Escape"    → "\x1b"
+"Down"      → "\x1b[B"
+"Backspace" → "\x7f"
+```
+
+This is the bridge between the proof author's mental model ("press Enter") and what the PTY actually sends ("\r").

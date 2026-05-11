@@ -1,0 +1,91 @@
+---
+title: Mental Model
+description: Understanding expectText-as-gate, snapshot semantics, and proofkit's plug-in seams.
+icon: Brain
+---
+
+## State-driven gates, not time-based waits
+
+The core insight of `tui-proof-kit`: **your TUI's screen state tells you when to act, not a timer.**
+
+Traditional terminal testing:
+
+```ts
+// BAD: guess-and-hope
+await sleep(3000);
+expect(stdout).toContain("Ready");
+```
+
+Proofkit:
+
+```ts
+// GOOD: state-driven gate
+{ expectText: "Ready", timeoutMs: 15_000 }
+```
+
+The proof waits _until_ "Ready" appears. If it takes 500ms, the proof proceeds in 500ms. If it takes 10s (slow CI), the proof waits. No guessing. No flaky tests.
+
+This works because `expectText` scans the **entire virtual terminal buffer** — the full `cols × rows` grid — not just stdout lines. Full-screen TUIs overwrite regions; the latest state of every cell is what matters.
+
+## Snapshots: golden frames for the terminal
+
+A `snapshot` is the entire terminal buffer at a point in time — every cell (character + style), serialized to a plain text file.
+
+```ts
+{
+  expectSnapshot: "04-defaults-menu";
+}
+```
+
+First run (`PROOFKIT_UPDATE_SNAPSHOTS=1`) writes the buffer to `__snapshots__/04-defaults-menu.txt`. This is your **golden frame**.
+
+Subsequent runs compare the live buffer against the golden frame. Any difference — a character changed, a line shifted, a color inversion — is a **snapshot mismatch**. The HTML report shows a side-by-side diff.
+
+### When to snapshot
+
+- After `expectText` — you know the screen reached the state you expect; snapshot to lock it in.
+- Before destructive actions — capture "before" state to catch regressions in intermediate screens.
+
+### When NOT to snapshot
+
+- Dynamic content (timestamps, PIDs, version numbers) — use `redactors` to strip these.
+- Every screen — snapshots are regression assertions, not a debug log. Use `capture` for debug captures.
+
+### Snapshot update modes
+
+| Mode          | Trigger                                   | Behavior                              |
+| ------------- | ----------------------------------------- | ------------------------------------- |
+| **Initial**   | `PROOFKIT_UPDATE_SNAPSHOTS=1` env var     | Writes all golden frames from scratch |
+| **Selective** | `update: true` on a single expectSnapshot | Updates just that snapshot            |
+| **Verify**    | Default (no env var, no `update: true`)   | Compares against saved golden frames  |
+
+## Redactors: strip the non-deterministic
+
+Terminal apps emit non-deterministic content — version numbers, timestamps, spinners, PIDs. Redactors strip these before frames are written or compared:
+
+```ts
+redactors: [
+  { pattern: /v\d+\.\d+\.\d+/g, replacement: "v<version>" },
+  { pattern: /PID \d+/g, replacement: "PID <redacted>" },
+];
+```
+
+Redactors run on every frame — snapshots, captures, and the report. They don't affect what the TUI actually renders; they only affect what proofkit records.
+
+## The proof lifecycle
+
+```
+prepare() → launch TUI → execute steps → verify() → report
+```
+
+1. **`prepare()`** — async setup (clean temp dirs, fetch fixtures). Runs before the TUI starts.
+2. **Launch** — the TUI is spawned in a real PTY. `command` + `args` + `env` as you'd type in a shell.
+3. **Steps** — sequential. Each step's actions run in order. The runner stops at the first failed `expectText` or `expectSnapshot`.
+4. **`verify()`** — final synchronous assertions. Throw to fail the proof. Access `ctx.vars`, `ctx.capture("id")`, push structured `ctx.finding(...)` entries.
+5. **Report** — HTML file written to `handoffRoot/`. Bundles findings, diffs, and an embedded asciinema replay.
+
+## Plug-in seams
+
+`tui-proof-kit` is designed to be consumed by **coding agents** (Claude, Codex, etc.) through a `scaffold-proof` verb. The framework itself is a library; the agent layer generates proof files.
+
+The `.claude-plugin/marketplace.json` root catalog + the `scaffold-proof` skill document best practices for proof authors. Agents auto-invoke the skill when asked to write or debug a proof.

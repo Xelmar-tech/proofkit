@@ -1,0 +1,149 @@
+---
+title: Action Reference
+description: Every action type available in proofkit steps, with one-line examples.
+icon: Code
+---
+
+All actions live inside `steps[].actions[]`. The runner processes them sequentially within each step and stops at the first failing `expectText` or `expectSnapshot`.
+
+## `expectText`
+
+Wait until the given text substring appears on the virtual screen. Timeout defaults to 15 seconds.
+
+```ts
+{ expectText: "Ok to proceed?" }
+{ expectText: "What is your name?", timeoutMs: 30_000 }
+```
+
+- **State gate** — the proof waits until the text is visible.
+- Matches _anywhere_ on screen, not just the current cursor line.
+- Use substrings, not full lines — minor copy changes won't break your proof.
+
+## `expectSnapshot`
+
+Capture the entire terminal buffer and compare against a saved golden frame.
+
+```ts
+{ expectSnapshot: "welcome-screen" }
+{ expectSnapshot: "customize-screen", update: true }
+```
+
+- First run with `PROOFKIT_UPDATE_SNAPSHOTS=1` writes the golden frame.
+- Subsequent runs compare against the saved frame and fail on mismatch.
+- Set `update: true` on a single snapshot to force-refresh it without updating all snapshots.
+- Mismatches produce a side-by-side diff in the HTML report.
+
+## `capture`
+
+Save the current screen to a file **without** comparing to a golden frame.
+
+```ts
+{
+  capture: "debug-before-enter";
+}
+```
+
+- Useful for debugging intermediate states.
+- Saved to `evidence/<id>/captures/<name>.txt`.
+
+## `type`
+
+Send text to the TUI's stdin as if the user typed it.
+
+```ts
+{
+  type: "y";
+}
+{
+  type: (ctx) => ctx.vars.projectName as string;
+}
+```
+
+- Accepts a string or a function that receives `ProofContext`.
+- Functions let you type dynamic values (e.g., resolved from a `resolve` action or a fixture).
+
+## `press`
+
+Send a single keypress to the TUI. Standard keys are named; custom keys pass through.
+
+```ts
+// Named keys
+{
+  press: "Enter";
+}
+{
+  press: "Escape";
+}
+{
+  press: "Backspace";
+}
+{
+  press: "Tab";
+}
+{
+  press: "Up";
+}
+{
+  press: "Down";
+}
+{
+  press: "Left";
+}
+{
+  press: "Right";
+}
+```
+
+Arbitrary key strings are supported but named keys are typed with `as const` for best DX:
+
+```ts
+{
+  press: "a";
+} // lowercase letter
+{
+  press: "A";
+} // uppercase (shift)
+{
+  press: " ";
+} // space
+```
+
+## `waitMs`
+
+Pause execution for a fixed duration. Avoid where possible — prefer `expectText` gates.
+
+```ts
+{
+  waitMs: 200;
+}
+```
+
+- Use sparingly. State-driven gates (`expectText`) are more reliable.
+- Legitimate uses: waiting for an animation to complete when there's no visible state change to gate on.
+
+## `resolve`
+
+Run an async function and store the result in `ctx.vars`.
+
+```ts
+{ resolve: async (ctx) => {
+    const resp = await fetch("https://api.example.com/token");
+    return await resp.text();
+  }, var: "authToken" }
+```
+
+- Results go into `ctx.vars[var]` — accessible from `type` functions and `verify`.
+- Use for fixture allocation, API calls, or any async setup that depends on the proof state at this point.
+
+## Dynamic action lists
+
+You can generate actions programmatically:
+
+```ts
+actions: [
+  ...Array.from({ length: 13 }, () => ({ press: "Backspace" as const })),
+  { type: "new-value" },
+],
+```
+
+This is the same as writing 13 Backspace actions inline — useful when action counts depend on input values.

@@ -1,31 +1,52 @@
 ---
-title: Hello World
-description: Your favourite docs framework.
-icon: Rocket
+title: What is tui-proof-kit?
+description: Drive terminal apps, record sessions, produce evidence packs.
+icon: Terminal
 ---
 
-Hey there! Fumadocs is the docs framework that also works on Tanstack Start!
+`tui-proof-kit` is a Node.js framework for **driving terminal applications** programmatically and producing **verifiable evidence** that they behaved correctly.
 
-## Heading
+It answers the question: _"Does my TUI/CLI actually work end-to-end, from launch to final screen?"_ — and gives you a permanent HTML report as proof.
 
-Hello World!
+## The problem it solves
 
-<Cards>
-  <Card title="Learn more about Tanstack Start" href="https://tanstack.com/start" />
-  <Card title="Learn more about Fumadocs" href="https://fumadocs.dev" />
-</Cards>
+Terminal apps are hard to test. Screens change. Prompts appear and disappear. The visual state of a full-screen TUI can't be captured by stdout assertions alone.
 
-### CodeBlock
+`tui-proof-kit` gives you:
 
-```ts
-console.log("Hello World");
+- **State-driven assertions** — `expectText("Ready")` waits until "Ready" appears on screen, then proceeds. No sleep(3000) hacks.
+- **Golden-frame snapshots** — `expectSnapshot("welcome-screen")` captures the entire terminal buffer and diffs it against a saved reference. Regressions are a one-line report.
+- **Structured findings** — every step produces a pass/fail/info finding. The final HTML report bundles them all with a replayable cast player.
+
+## How it works (30 seconds)
+
+You write a **proof file** — a TypeScript script that defines `defineProof({ ... }).run({ ... })`. The framework:
+
+1. Launches your TUI in a real PTY via [node-pty](https://github.com/mscdex/node-pty).
+2. Renders a virtual screen via [@xterm/headless](https://github.com/xtermjs/xterm.js) — same ANSI parsing as a real terminal.
+3. Drives the TUI through steps you define: type, press keys, wait for text, capture snapshots.
+4. Produces an HTML report with findings, diffs, and an embedded asciinema-style replay.
+
+## Who it's for
+
+- **CLI tool authors** who want to stop shipping broken flags.
+- **TUI framework maintainers** who need regression coverage for multi-screen flows.
+- **QA engineers** who need reproducible, shareable evidence for terminal apps.
+
+## Quick start
+
+```bash
+# Install
+npm install tui-proof-kit
+
+# Scaffold a proof for your TUI
+npx tui-proof-kit scaffold-proof ./my-cli.ts
+
+# Run it (first time: record snapshots)
+PROOFKIT_UPDATE_SNAPSHOTS=1 node --experimental-strip-types proofs/my-cli.proof.ts
+
+# Later: verify against saved snapshots
+node --experimental-strip-types proofs/my-cli.proof.ts
 ```
 
-#### Table
-
-| Head                            | Description                         |
-| ------------------------------- | ----------------------------------- |
-| `hello`                         | Hello World                         |
-| very **important**              | Hey                                 |
-| _Surprisingly_                  | Fumadocs                            |
-| very long text that looks weird | hello world hello world hello world |
+Ready to go deeper? Head to [Getting Started](/docs/getting-started).

@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Epic — tui-proof-kit monorepo migration · paused 2026-05-11</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <style>
+      body {
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+      }
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.125rem 0.5rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 500;
+      }
+      .lane {
+        border-left: 3px solid;
+        padding-left: 1rem;
+      }
+      .grid-tickets {
+        display: grid;
+        grid-template-columns: 4rem 1fr auto;
+        gap: 0.5rem 0.75rem;
+        align-items: baseline;
+        font-size: 0.875rem;
+      }
+      .ticket-id {
+        font-family: ui-monospace, monospace;
+        color: #6b7280;
+      }
+      .adr-gate {
+        background: #fef3c7;
+        border: 1px dashed #f59e0b;
+        padding: 0.5rem 0.75rem;
+        border-radius: 0.375rem;
+        font-size: 0.8125rem;
+      }
+      .adr-accepted {
+        background: #dcfce7;
+        border: 1px solid #16a34a;
+        padding: 0.5rem 0.75rem;
+        border-radius: 0.375rem;
+        font-size: 0.8125rem;
+        color: #14532d;
+      }
+    </style>
+  </head>
+  <body class="bg-slate-50 text-slate-900">
+    <div class="max-w-5xl mx-auto px-6 py-10">
+      <header class="mb-8">
+        <div class="text-xs uppercase tracking-wider text-amber-600 mb-1">
+          Epic dashboard · PAUSED 2026-05-11 · resume next week via /orchestrate
+        </div>
+        <h1 class="text-3xl font-semibold">
+          tui-proof-kit · monorepo migration &amp; ecosystem buildout
+        </h1>
+        <p class="text-slate-600 mt-2 max-w-3xl">
+          Source of truth: <code class="text-sm">EPIC.md</code>. Repo:
+          <code class="text-sm">~/projects/capxul/proofkit/</code>. Owner: Aaron. ADR sign-off:
+          team-lead (delegated through epic completion). Pause reason: 5% weekly token budget
+          remaining. Handoff doc: <code class="text-sm">HANDOFF.md</code>.
+        </p>
+      </header>
+
+      <section class="mb-8 bg-amber-50 border border-amber-300 rounded-md p-4">
+        <h2 class="text-base font-semibold text-amber-900 mb-2 flex items-center gap-2">
+          <i data-lucide="pause" class="w-4 h-4"></i> Resume checklist (read first next session)
+        </h2>
+        <ol class="text-sm text-slate-800 space-y-1 list-decimal list-inside">
+          <li>
+            Open <code>/Users/abuusama/projects/capxul/proofkit/HANDOFF.md</code> (team-lead's
+            handoff).
+          </li>
+          <li>
+            Check git state: was M1 merged to <code>main</code> before pause? Implementer was
+            mid-flight on the M1-merge-then-Phase-C run.
+          </li>
+          <li>
+            Re-route ADR-002 + ADR-003 drafts to team-lead for sign-off (see Decisions section
+            below).
+          </li>
+          <li>
+            Resume with <code>/orchestrate</code>; full authority delegation memory persists in this
+            team's task list.
+          </li>
+        </ol>
+      </section>
+
+      <section class="mb-10">
+        <h2 class="text-lg font-semibold mb-3 flex items-center gap-2">
+          <i data-lucide="activity" class="w-4 h-4"></i> Wave status at pause
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-3 text-sm">
+          <div class="bg-white rounded-md border border-slate-200 p-3">
+            <div class="font-medium">M1 Foundation</div>
+            <div class="text-xs text-slate-500 mt-1">
+              branch <code>feat/m1-monorepo-foundation</code> · b15bd4f · approved to merge
+            </div>
+            <span class="pill bg-emerald-100 text-emerald-800 mt-2"
+              ><i data-lucide="check" class="w-3 h-3"></i> approved · merge mid-flight at
+              pause</span
+            >
+          </div>
+          <div class="bg-white rounded-md border border-slate-200 p-3">
+            <div class="font-medium">M2 Quality gates</div>
+            <div class="text-xs text-slate-500 mt-1">
+              ADR-001 accepted · Phase C dispatched, no completion report
+            </div>
+            <span class="pill bg-blue-100 text-blue-800 mt-2"
+              ><i data-lucide="pause" class="w-3 h-3"></i> paused mid-flight</span
+            >
+          </div>
+          <div class="bg-white rounded-md border border-slate-200 p-3">
+            <div class="font-medium">M3 Docs site</div>
+            <div class="text-xs text-slate-500 mt-1">blocked on M2 landing</div>
+            <span class="pill bg-slate-100 text-slate-700 mt-2"
+              ><i data-lucide="lock" class="w-3 h-3"></i> blocked</span
+            >
+          </div>
+          <div class="bg-white rounded-md border border-slate-200 p-3">
+            <div class="font-medium">M4 Plugins</div>
+            <div class="text-xs text-slate-500 mt-1">
+              ADR-002 + ADR-003 drafted · routed to team-lead
+            </div>
+            <span class="pill bg-amber-100 text-amber-800 mt-2"
+              ><i data-lucide="user-check" class="w-3 h-3"></i> awaiting sign-off</span
+            >
+          </div>
+          <div class="bg-white rounded-md border border-slate-200 p-3">
+            <div class="font-medium">M5 Marketplace + deploy</div>
+            <div class="text-xs text-slate-500 mt-1">blocked on M1 merge landing on main</div>
+            <span class="pill bg-slate-100 text-slate-700 mt-2"
+              ><i data-lucide="lock" class="w-3 h-3"></i> blocked</span
+            >
+          </div>
+        </div>
+      </section>
+
+      <section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3 flex items-center gap-2">
+          <i data-lucide="check-circle" class="w-4 h-4"></i> Decisions ledger at pause
+        </h2>
+        <div class="bg-emerald-50 border border-emerald-200 rounded-md p-4 text-sm text-slate-700">
+          <ul class="space-y-2 list-disc list-inside">
+            <li>
+              <strong>Authority:</strong> Aaron delegated full sign-off authority to team-lead
+              through epic completion (2026-05-11).
+            </li>
+            <li>
+              <strong>ADR-001 — Accepted.</strong> lefthook + pre-commit (oxfmt/oxlint on staged
+              files with stage_fixed) + pre-push (turbo check-types + turbo check whole-workspace,
+              hard-reject, no <code>--no-verify</code>). Bootstrap via <code>pnpm prepare</code> →
+              <code>lefthook install</code>.
+            </li>
+            <li>
+              <strong>M1 merge — Approved.</strong> All 7 deviations ratified. Implementer
+              dispatched to merge + start Phase C on a fresh
+              <code>feat/m2-quality-gates</code> branch; no completion report received before pause.
+            </li>
+            <li>
+              <strong>M4 verb — Decided.</strong> <code>scaffold-proof &lt;tui-path&gt;</code> for
+              both Claude and Codex plugins (v0 single-verb cap).
+            </li>
+            <li>
+              <strong>Changeset access — Decided.</strong> Stay <code>restricted</code> until
+              ADR-005 / X-6 deploy workflow lands.
+            </li>
+            <li>
+              <strong>Codex hooks finding — Documented.</strong>
+              <code>/codex/plugins/hooks</code> URL is 404; ADR-003 v0 ships without a hooks/
+              directory.
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="mb-10">
+        <h2 class="text-lg font-semibold mb-3 flex items-center gap-2">
+          <i data-lucide="gavel" class="w-4 h-4"></i> ADR ledger
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+          <div class="adr-accepted">
+            <strong>ADR-001</strong> · pre-commit + pre-push hooks (lefthook) —
+            <strong>Accepted</strong> 2026-05-11 by team-lead. Impl Phase C dispatched, paused
+            mid-flight.
+          </div>
+          <div class="adr-gate">
+            <strong>ADR-002</strong> · Claude plugin scope — Draft saved; 5 open sub-decisions
+            routed to team-lead (output dir, collision policy, template language, naming,
+            telemetry). Awaiting sign-off.
+          </div>
+          <div class="adr-gate">
+            <strong>ADR-003</strong> · Codex plugin scope — Draft saved; mirrors ADR-002 with 3
+            forced divergences (no slash command, no hooks/, Codex <code>interface</code> block). 5
+            open sub-decisions. Awaiting sign-off.
+          </div>
+          <div class="adr-gate">
+            <strong>ADR-004</strong> · capsule-factory listing — pending; drafts after M2 lands on
+            main.
+          </div>
+          <div class="adr-gate">
+            <strong>ADR-005</strong> · deploy infra (docs host + npm CI + GH remote decision) —
+            pending; drafts after M2 lands on main.
+          </div>
+        </div>
+      </section>
+
+      <section class="mb-10">
+        <h2 class="text-lg font-semibold mb-3 flex items-center gap-2">
+          <i data-lucide="folder" class="w-4 h-4"></i> Artifacts on disk at pause
+        </h2>
+        <ul class="text-sm text-slate-700 space-y-1 list-disc list-inside font-mono">
+          <li>
+            <code>docs/research/M4-plugin-patterns.md</code> — analyst's plugin briefing +
+            Codex-hooks-404 appendix
+          </li>
+          <li><code>docs/research/M2-lefthook.md</code> — implementer's lefthook research note</li>
+          <li><code>docs/adrs/001-pre-commit-hooks.md</code> — Accepted</li>
+          <li><code>docs/adrs/002-claude-plugin.md</code> — draft, awaiting team-lead</li>
+          <li><code>docs/adrs/003-codex-plugin.md</code> — draft, awaiting team-lead</li>
+          <li><code>reports/2026-05-11-epic-monorepo-migration.html</code> — this dashboard</li>
+          <li><code>HANDOFF.md</code> — team-lead's handoff doc (referenced in pause message)</li>
+        </ul>
+      </section>
+
+      <section class="mb-10">
+        <h2 class="text-lg font-semibold mb-3 flex items-center gap-2">
+          <i data-lucide="play" class="w-4 h-4"></i> Next actions on resume
+        </h2>
+        <ol class="text-sm text-slate-700 space-y-2 list-decimal list-inside">
+          <li>
+            Verify whether implementer completed the M1-merge-into-main step before pause (check
+            <code>git log main</code> in the proofkit repo).
+          </li>
+          <li>
+            If M2 Phase C was started but not committed, finish it on
+            <code>feat/m2-quality-gates</code> with empirical verification of all 4 acceptance
+            criteria.
+          </li>
+          <li>
+            Get team-lead's sign-off on ADR-002 + ADR-003 sub-decisions (10 questions total, all
+            with proposed defaults).
+          </li>
+          <li>
+            Dispatch M4a (Claude plugin build) and M5a (capsule listing research + ADR-004 draft)
+            once M2 lands.
+          </li>
+          <li>Dispatch M3 docs once M2 lands (paralleling M4a / M5a).</li>
+          <li>
+            Once all 5 ADRs accepted and all builds shipped: qa-capture full-epic verification
+            (fresh clone, install, test, build, docs site live, both plugins install, capsule
+            listing visible).
+          </li>
+          <li>Closing summary to team-lead when every ticket is terminal.</li>
+        </ol>
+      </section>
+
+      <footer class="text-xs text-slate-400 border-t border-slate-200 pt-4">
+        Paused 2026-05-11. epic-conductor shutting down per team-lead request. Resume via
+        <code>/orchestrate</code>.
+      </footer>
+    </div>
+    <script>
+      lucide.createIcons();
+    </script>
+  </body>
+</html>

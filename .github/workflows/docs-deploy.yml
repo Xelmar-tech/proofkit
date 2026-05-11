@@ -1,0 +1,31 @@
+name: Deploy Docs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/fumadocs/**"
+      - "packages/**"
+      - "docs/**"
+
+jobs:
+  deploy-docs:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "pnpm"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter fumadocs build
+      - name: Publish to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy apps/fumadocs/.output --project-name=proofkit-docs

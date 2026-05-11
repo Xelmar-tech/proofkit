@@ -1,0 +1,137 @@
+---
+title: Getting Started
+description: Install tui-proof-kit, write your first proof, and run it.
+icon: Play
+---
+
+## Installation
+
+```bash
+npm install tui-proof-kit
+# or
+pnpm add tui-proof-kit
+# or
+yarn add tui-proof-kit
+```
+
+Requirements: **Node.js >= 22** with `--experimental-strip-types` support for running `.ts` proof files directly.
+
+## Your first proof
+
+Let's test a simple echo script. Create `hello.ts`:
+
+```ts title="hello.ts"
+// The TUI we want to test — prints a prompt, reads a name, greets.
+import readline from "node:readline";
+
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
+
+rl.question("What is your name? ", (name) => {
+  console.log(`Hello, ${name}!`);
+  rl.close();
+});
+```
+
+Now write a proof for it. Create `proofs/hello.proof.ts`:
+
+```ts title="proofs/hello.proof.ts"
+import { defineProof } from "tui-proof-kit";
+
+const proof = defineProof({
+  id: "hello",
+  title: "Echo script proof",
+  cwd: process.cwd(),
+  handoffRoot: "./evidence/hello",
+  width: 80,
+  height: 24,
+});
+
+await proof.run({
+  launch: {
+    command: "node",
+    args: ["--experimental-strip-types", "hello.ts"],
+  },
+  steps: [
+    {
+      id: "greet",
+      actions: [
+        // Wait until the prompt is visible on screen.
+        { expectText: "What is your name?", timeoutMs: 5_000 },
+        // Type a name and press Enter.
+        { type: "Alice" },
+        { press: "Enter" },
+        // Wait for the greeting.
+        { expectText: "Hello, Alice!", timeoutMs: 5_000 },
+      ],
+    },
+  ],
+  verify: (ctx) => {
+    ctx.finding({
+      status: "pass",
+      title: "Greeting flow",
+      body: "Prompt appeared, name submitted, greeting verified.",
+    });
+  },
+});
+```
+
+Run it:
+
+```bash
+node --experimental-strip-types proofs/hello.proof.ts
+```
+
+If everything works, you'll see:
+
+```
+→ evidence/hello/REPORT.html   (HTML report with findings + replay)
+→ evidence/hello/casts/        (asciinema cast files)
+→ evidence/hello/captures/     (captured frame text files)
+```
+
+Open the `REPORT.html` in any browser — it shows every step, whether it passed, and an embedded terminal replay.
+
+## Adding snapshot assertions
+
+`expectText` tells you the right text appeared. `expectSnapshot` tells you the **entire screen** matches:
+
+```ts
+steps: [
+  {
+    id: "greet",
+    actions: [
+      { expectText: "What is your name?" },
+      // Golden-frame: save this screen as "prompt" for future comparison.
+      { expectSnapshot: "prompt" },
+      { type: "Alice" },
+      { press: "Enter" },
+      { expectText: "Hello, Alice!" },
+      // Golden-frame: save the greeting screen.
+      { expectSnapshot: "greeting" },
+    ],
+  },
+],
+```
+
+First run (record snapshots):
+
+```bash
+PROOFKIT_UPDATE_SNAPSHOTS=1 node --experimental-strip-types proofs/hello.proof.ts
+```
+
+Subsequent runs (verify against saved snapshots) — just drop the env var:
+
+```bash
+node --experimental-strip-types proofs/hello.proof.ts
+```
+
+If the greeting screen changes (a regression), the report will show a side-by-side diff.
+
+## Next steps
+
+- [Tutorial: driving create-next-app](/docs/tutorial-create-next-app) — a full multi-screen walkthrough with snapshots.
+- [Action reference](/docs/reference/actions) — every action type explained.
+- [Mental model](/docs/concepts/mental-model) — understand expectText-as-gate and the snapshot semantics.

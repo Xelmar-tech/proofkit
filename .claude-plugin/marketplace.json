@@ -1,0 +1,11 @@
+{
+  "name": "proofkit",
+  "owner": { "name": "Capxul", "email": "aaron@capxul.com" },
+  "plugins": [
+    {
+      "name": "proofkit",
+      "source": "./skills/proofkit",
+      "description": "Scaffold, write, and debug tui-proof-kit proof files for terminal apps. Coding agents auto-invoke this skill for proofkit best practices."
+    }
+  ]
+}

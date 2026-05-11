@@ -1,0 +1,43 @@
+---
+title: Architecture Decisions
+description: Index of ADRs and decision packs for tui-proof-kit.
+icon: ScrollText
+---
+
+Every significant architectural choice in `tui-proof-kit` is documented as an **ADR** (Architecture Decision Record) in `docs/adrs/`. Each ADR captures: context (why this mattered), the decision, rationale, alternatives considered, and consequences.
+
+## ADR index
+
+| ADR                   | Title                                      | Status   |
+| --------------------- | ------------------------------------------ | -------- |
+| [001](/docs/adrs/001) | Pre-commit and pre-push hooks via lefthook | Accepted |
+| [002](/docs/adrs/002) | Claude Code plugin (`scaffold-proof` verb) | Accepted |
+| [003](/docs/adrs/003) | Codex plugin (`scaffold-proof` verb)       | Accepted |
+| [004](/docs/adrs/004) | Capsule-factory marketplace integration    | Draft    |
+
+## Decision packs (bundled choices)
+
+Some decisions were made as bundles — changing one would ripple through the others:
+
+### Toolchain pack (M1)
+
+- **Turborepo** over nx/npm workspaces — lighter config, native to the pnpm ecosystem.
+- **pnpm** over npm/yarn — strict dependency resolution, workspace protocol (`workspace:*`).
+- **oxlint + oxfmt** over ESLint + Prettier — 50x/10x faster, single Rust toolchain.
+- **Fumadocs** over Docusaurus/Nextra — Tanstack Start native, colocated in monorepo.
+- **Changesets** over semantic-release — manual version bump prompts, changelog generation.
+
+### Quality pack (M2)
+
+- **Lefthook** over husky+lint-staged — single binary, native staged-file variable, `stage_fixed`.
+- **Pre-commit**: staged-file-scoped, parallel format+lint, auto-format + auto-restage.
+- **Pre-push**: whole-workspace, sequential check-types+check, hard-reject, no `--no-verify` carve-out.
+
+### Plugin pack (M4)
+
+- **Single verb** (`scaffold-proof`) for v0 — scope cap per EPIC.md.
+- **Shared package** (`packages/plugin-shared/`) — Claude and Codex plugins consume same logic.
+- **Single catalog** (`.claude-plugin/marketplace.json`) — Codex reads Claude's catalog format.
+- **Vertical-plugin shape** — skills + commands, not agent personas.
+
+See the individual ADRs for the full rationale behind each decision.
