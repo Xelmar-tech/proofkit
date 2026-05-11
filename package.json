@@ -1,0 +1,55 @@
+{
+  "name": "@capxul/proofkit",
+  "version": "0.1.0",
+  "description": "Drive terminal apps, record sessions, produce evidence packs.",
+  "type": "module",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --clean",
+    "test": "vitest run",
+    "typecheck": "bun x tsc --noEmit"
+  },
+  "dependencies": {
+    "node-pty": "^1.1.0"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/node": "^25.7.0",
+    "tsup": "^8.5.1",
+    "vitest": "^4.1.6"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "trustedDependencies": [
+    "node-pty"
+  ],
+  "keywords": [
+    "terminal",
+    "tui",
+    "testing",
+    "asciinema",
+    "pty"
+  ],
+  "license": "UNLICENSED",
+  "publishConfig": {
+    "access": "restricted"
+  }
+}
