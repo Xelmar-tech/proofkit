@@ -23,18 +23,12 @@ test("defineProof drives echo-prompt and produces a complete evidence pack", asy
   const result = await proof.run({
     launch: {
       command: "bun",
-      args: [
-        "run",
-        path.join(import.meta.dirname, "fixtures", "echo-prompt.ts"),
-      ],
+      args: ["run", path.join(import.meta.dirname, "fixtures", "echo-prompt.ts")],
     },
     steps: [
       {
         id: "prompt",
-        actions: [
-          { expectText: "Enter your name:" },
-          { capture: "01-prompt" },
-        ],
+        actions: [{ expectText: "Enter your name:" }, { capture: "01-prompt" }],
       },
       {
         id: "type-and-submit",
@@ -42,10 +36,7 @@ test("defineProof drives echo-prompt and produces a complete evidence pack", asy
       },
       {
         id: "greet",
-        actions: [
-          { expectText: "Hello, Aaron!" },
-          { capture: "02-greet" },
-        ],
+        actions: [{ expectText: "Hello, Aaron!" }, { capture: "02-greet" }],
       },
     ],
     verify: (ctx) => {
@@ -56,22 +47,13 @@ test("defineProof drives echo-prompt and produces a complete evidence pack", asy
   });
 
   expect(result.status).toBe("pass");
-  expect(existsSync(path.join(root, "evidence", "casts", "echo.cast"))).toBe(
-    true,
-  );
-  expect(
-    existsSync(path.join(root, "evidence", "captures", "01-prompt.txt")),
-  ).toBe(true);
-  expect(
-    existsSync(path.join(root, "evidence", "captures", "02-greet.txt")),
-  ).toBe(true);
+  expect(existsSync(path.join(root, "evidence", "casts", "echo.cast"))).toBe(true);
+  expect(existsSync(path.join(root, "evidence", "captures", "01-prompt.txt"))).toBe(true);
+  expect(existsSync(path.join(root, "evidence", "captures", "02-greet.txt"))).toBe(true);
   expect(existsSync(path.join(root, "echo-REPORT.html"))).toBe(true);
 
   const resultJson = JSON.parse(
-    readFileSync(
-      path.join(root, "evidence", "logs", "echo-result.json"),
-      "utf-8",
-    ),
+    readFileSync(path.join(root, "evidence", "logs", "echo-result.json"), "utf-8"),
   );
   expect(resultJson.status).toBe("pass");
 });
@@ -95,9 +77,7 @@ test("defineProof reports `blocked` when expectText times out", async () => {
     steps: [
       {
         id: "wait-for-nonsense",
-        actions: [
-          { expectText: "this string will never appear", timeoutMs: 500 },
-        ],
+        actions: [{ expectText: "this string will never appear", timeoutMs: 500 }],
       },
     ],
     verify: () => {},
@@ -105,11 +85,9 @@ test("defineProof reports `blocked` when expectText times out", async () => {
 
   expect(result.status).toBe("blocked");
   expect(result.stage).toBe("wait-for-nonsense");
-  expect(
-    existsSync(
-      path.join(root, "evidence", "captures", "wait-for-nonsense-blocked.txt"),
-    ),
-  ).toBe(true);
+  expect(existsSync(path.join(root, "evidence", "captures", "wait-for-nonsense-blocked.txt"))).toBe(
+    true,
+  );
 });
 
 test("defineProof surfaces verify failures as `fail`", async () => {

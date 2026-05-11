@@ -13,11 +13,7 @@ interface ReportInput {
 }
 
 const escape = (s: string): string =>
-  s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+  s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 export function renderReport(input: ReportInput): string {
   const { title, ctx, captures, snapshotDiffs, castContent } = input;
@@ -31,17 +27,13 @@ export function renderReport(input: ReportInput): string {
 
   const findingRows = ctx.findings
     .map((f: Finding) => {
-      const cls =
-        f.status === "pass" ? "pass" : f.status === "info" ? "info" : "fail";
+      const cls = f.status === "pass" ? "pass" : f.status === "info" ? "info" : "fail";
       return `<tr><td class="${cls}">${escape(f.status)}</td><td>${escape(f.title)}</td><td>${escape(f.body)}</td></tr>`;
     })
     .join("\n");
 
   const captureBlocks = Object.entries(captures)
-    .map(
-      ([k, v]) =>
-        `<details><summary>${escape(k)}</summary><pre>${escape(v)}</pre></details>`,
-    )
+    .map(([k, v]) => `<details><summary>${escape(k)}</summary><pre>${escape(v)}</pre></details>`)
     .join("\n");
 
   const diffBlocks = snapshotDiffs

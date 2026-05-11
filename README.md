@@ -1,15 +1,29 @@
-# proofkit
+# tui-proof-kit
 
-To install dependencies:
+Drive terminal apps, record sessions, produce evidence packs.
 
-```bash
-bun install
+This is a pnpm + Turborepo monorepo.
+
+```
+apps/
+  fumadocs/            documentation site
+packages/
+  tui-proof-kit/       the framework
+  config/              shared tsconfig base
 ```
 
-To run:
+## Quickstart
 
 ```bash
-bun run index.ts
+pnpm install
+pnpm test
+pnpm build
+pnpm check
 ```
 
-This project was created using `bun init` in bun v1.3.8. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
+See `EPIC.md` for the current roadmap and `docs/adrs/` (forthcoming) for
+architectural decisions.
+
+## License
+
+MIT — see [LICENSE](./LICENSE).

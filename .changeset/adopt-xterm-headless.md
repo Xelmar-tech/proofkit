@@ -1,5 +1,5 @@
 ---
-"@capxul/proofkit": minor
+"tui-proof-kit": minor
 ---
 
 Adopt `@xterm/headless` as the driver's virtual screen model.

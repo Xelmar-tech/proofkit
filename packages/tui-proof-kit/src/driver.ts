@@ -23,12 +23,7 @@ import type { PressKey } from "./types.ts";
     const req = createRequire(import.meta.url);
     const nodePtyPkg = req.resolve("node-pty/package.json");
     const platform = `${process.platform}-${process.arch}`;
-    const helperPath = path.join(
-      path.dirname(nodePtyPkg),
-      "prebuilds",
-      platform,
-      "spawn-helper",
-    );
+    const helperPath = path.join(path.dirname(nodePtyPkg), "prebuilds", platform, "spawn-helper");
     const st = statSync(helperPath);
     if ((st.mode & 0o111) === 0) chmodSync(helperPath, 0o755);
   } catch {

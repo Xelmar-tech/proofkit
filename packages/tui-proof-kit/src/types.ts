@@ -47,15 +47,7 @@ export type Action =
   | { waitMs: number }
   | { resolve: (ctx: ProofContext) => Promise<unknown>; var: string };
 
-export type PressKey =
-  | "Enter"
-  | "Escape"
-  | "Backspace"
-  | "Tab"
-  | "Up"
-  | "Down"
-  | "Left"
-  | "Right";
+export type PressKey = "Enter" | "Escape" | "Backspace" | "Tab" | "Up" | "Down" | "Left" | "Right";
 
 export interface ProofContext {
   /** Per-proof scratch space. resolve actions write here; type/verify read. */

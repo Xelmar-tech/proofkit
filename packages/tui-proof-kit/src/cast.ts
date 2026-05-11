@@ -25,9 +25,6 @@ export class CastWriter {
   }
 
   writeEvent(elapsedSeconds: number, data: string): void {
-    appendFileSync(
-      this.path,
-      JSON.stringify([elapsedSeconds, "o", data]) + "\n",
-    );
+    appendFileSync(this.path, JSON.stringify([elapsedSeconds, "o", data]) + "\n");
   }
 }

@@ -1,11 +1,5 @@
 import { test, expect, afterAll } from "vitest";
-import {
-  mkdtempSync,
-  rmSync,
-  existsSync,
-  readFileSync,
-  writeFileSync,
-} from "node:fs";
+import { mkdtempSync, rmSync, existsSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { defineProof } from "../src/index.ts";
@@ -32,10 +26,7 @@ async function runOnce(handoffRoot: string) {
     steps: [
       {
         id: "wait-hello",
-        actions: [
-          { expectText: "hello" },
-          { expectSnapshot: "01-hello" },
-        ],
+        actions: [{ expectText: "hello" }, { expectSnapshot: "01-hello" }],
       },
     ],
     verify: () => {},
@@ -47,9 +38,7 @@ test("snapshot: first run writes file, second run matches", async () => {
 
   const r1 = await runOnce(root);
   expect(r1.status).toBe("pass");
-  expect(existsSync(path.join(root, "__snapshots__", "01-hello.txt"))).toBe(
-    true,
-  );
+  expect(existsSync(path.join(root, "__snapshots__", "01-hello.txt"))).toBe(true);
 
   const r2 = await runOnce(root);
   expect(r2.status).toBe("pass");
@@ -61,17 +50,12 @@ test("snapshot: mutated snapshot file produces mismatch + diff", async () => {
   const r1 = await runOnce(root);
   expect(r1.status).toBe("pass");
 
-  writeFileSync(
-    path.join(root, "__snapshots__", "01-hello.txt"),
-    "totally different content",
-  );
+  writeFileSync(path.join(root, "__snapshots__", "01-hello.txt"), "totally different content");
 
   const r2 = await runOnce(root);
   expect(r2.status).toBe("fail");
   expect(r2.stage).toBe("wait-hello");
-  expect(
-    existsSync(path.join(root, "evidence", "diffs", "01-hello.diff.txt")),
-  ).toBe(true);
+  expect(existsSync(path.join(root, "evidence", "diffs", "01-hello.diff.txt"))).toBe(true);
 });
 
 test("snapshot: in-place \\r redraw shows only the final state", async () => {
@@ -90,28 +74,19 @@ test("snapshot: in-place \\r redraw shows only the final state", async () => {
     const result = await proof.run({
       launch: {
         command: "bun",
-        args: [
-          "run",
-          path.join(import.meta.dirname, "fixtures", "redraw.ts"),
-        ],
+        args: ["run", path.join(import.meta.dirname, "fixtures", "redraw.ts")],
       },
       steps: [
         {
           id: "wait-final",
-          actions: [
-            { expectText: "status: done" },
-            { expectSnapshot: "redraw" },
-          ],
+          actions: [{ expectText: "status: done" }, { expectSnapshot: "redraw" }],
         },
       ],
       verify: () => {},
     });
     expect(result.status).toBe("pass");
 
-    const snap = readFileSync(
-      path.join(root, "__snapshots__", "redraw.txt"),
-      "utf-8",
-    );
+    const snap = readFileSync(path.join(root, "__snapshots__", "redraw.txt"), "utf-8");
     // The screen model should show only the final state, NOT all three.
     expect(snap).toContain("status: done");
     expect(snap).not.toContain("status: starting");

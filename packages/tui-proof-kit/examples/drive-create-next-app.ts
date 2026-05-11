@@ -31,12 +31,7 @@ const proof = defineProof({
   id: "drive-create-next-app",
   title: "@capxul/proofkit drives create-next-app",
   cwd: TMP_DIR,
-  handoffRoot: path.join(
-    import.meta.dirname,
-    "..",
-    "evidence",
-    "drive-create-next-app",
-  ),
+  handoffRoot: path.join(import.meta.dirname, "..", "evidence", "drive-create-next-app"),
   width: 100,
   height: 36,
   redactors: [

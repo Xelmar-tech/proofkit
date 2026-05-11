@@ -12,8 +12,7 @@ import type {
   ProofResult,
 } from "./types.ts";
 
-const sleep = (ms: number): Promise<void> =>
-  new Promise((r) => setTimeout(r, ms));
+const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms));
 
 const redact = (s: string, r?: Redactor[]): string =>
   (r ?? []).reduce((a, x) => a.replace(x.pattern, x.replacement), s);
@@ -72,10 +71,7 @@ export function defineProof(config: ProofConfig) {
         outer: for (const step of spec.steps) {
           for (const action of step.actions) {
             if ("expectText" in action) {
-              const ok = await driver.waitForText(
-                action.expectText,
-                action.timeoutMs ?? 15_000,
-              );
+              const ok = await driver.waitForText(action.expectText, action.timeoutMs ?? 15_000);
               if (!ok) {
                 ctx.result = {
                   status: "blocked",
@@ -91,18 +87,12 @@ export function defineProof(config: ProofConfig) {
             } else if ("capture" in action) {
               const frame = redact(driver.captureFrame(), config.redactors);
               captures[action.capture] = frame;
-              writeFileSync(
-                path.join(handoffDir("captures"), `${action.capture}.txt`),
-                frame,
-              );
+              writeFileSync(path.join(handoffDir("captures"), `${action.capture}.txt`), frame);
             } else if ("expectSnapshot" in action) {
               const frame = redact(driver.captureFrame(), config.redactors);
               captures[action.expectSnapshot] = frame;
               writeFileSync(
-                path.join(
-                  handoffDir("captures"),
-                  `${action.expectSnapshot}.txt`,
-                ),
+                path.join(handoffDir("captures"), `${action.expectSnapshot}.txt`),
                 frame,
               );
               const localUpdate = updateMode || action.update === true;
@@ -125,10 +115,7 @@ export function defineProof(config: ProofConfig) {
                   actual: snapshotResult.actual,
                 });
                 writeFileSync(
-                  path.join(
-                    handoffDir("diffs"),
-                    `${action.expectSnapshot}.diff.txt`,
-                  ),
+                  path.join(handoffDir("diffs"), `${action.expectSnapshot}.diff.txt`),
                   `=== expected (${snapshotResult.path})\n${snapshotResult.expected}\n\n=== actual\n${snapshotResult.actual}\n`,
                 );
                 ctx.findings.push({
@@ -144,10 +131,7 @@ export function defineProof(config: ProofConfig) {
                 break outer;
               }
             } else if ("type" in action) {
-              const text =
-                typeof action.type === "function"
-                  ? action.type(ctx)
-                  : action.type;
+              const text = typeof action.type === "function" ? action.type(ctx) : action.type;
               driver.typeText(text);
               await sleep(80);
             } else if ("press" in action) {
@@ -202,10 +186,7 @@ export function defineProof(config: ProofConfig) {
           snapshotDiffs,
           castContent,
         });
-        writeFileSync(
-          path.join(config.handoffRoot, `${config.id}-REPORT.html`),
-          html,
-        );
+        writeFileSync(path.join(config.handoffRoot, `${config.id}-REPORT.html`), html);
       }
 
       return ctx.result;
