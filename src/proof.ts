@@ -1,4 +1,4 @@
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { createDriver } from "./driver.ts";
 import { renderReport } from "./report.ts";
@@ -185,13 +185,22 @@ export function defineProof(config: ProofConfig) {
           path.join(handoffDir("logs"), `${config.id}-result.json`),
           JSON.stringify(ctx.result, null, 2),
         );
+        // Inline the cast content into the HTML so the asciinema-player
+        // can render without a fetch (Chrome's file:// policy blocks fetches
+        // from local HTML files). The cast file remains on disk as an artifact.
+        let castContent = "";
+        try {
+          castContent = readFileSync(castPath, "utf-8");
+        } catch {
+          // First-ever run with no output yet; leave empty.
+        }
         const html = renderReport({
           id: config.id,
           title: config.title,
           ctx,
           captures,
           snapshotDiffs,
-          castRel: `evidence/casts/${config.id}.cast`,
+          castContent,
         });
         writeFileSync(
           path.join(config.handoffRoot, `${config.id}-REPORT.html`),

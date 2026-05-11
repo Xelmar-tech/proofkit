@@ -1,0 +1,6 @@
+Need to install the following packages:
+create-next-app@<version>
+Ok to proceed? (y) y
+✔ What is your project named? … tui-proof-kit
+✔ Would you like to use the recommended Next.js defaults? › No, customize settings
+? Would you like to use TypeScript? › No / Yes

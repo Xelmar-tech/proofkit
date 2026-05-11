@@ -6,7 +6,10 @@ interface ReportInput {
   ctx: ProofContext;
   captures: Record<string, string>;
   snapshotDiffs: Array<{ id: string; expected: string; actual: string }>;
-  castRel: string;
+  /** The full cast file contents, inlined into the report so the asciinema
+   *  player can render it without fetching (which Chrome's file:// policy
+   *  blocks). The cast file is still written to disk as an artifact. */
+  castContent: string;
 }
 
 const escape = (s: string): string =>
@@ -17,7 +20,7 @@ const escape = (s: string): string =>
     .replace(/"/g, "&quot;");
 
 export function renderReport(input: ReportInput): string {
-  const { title, ctx, captures, snapshotDiffs, castRel } = input;
+  const { title, ctx, captures, snapshotDiffs, castContent } = input;
 
   const statusClass =
     ctx.result.status === "pass"
@@ -91,10 +94,14 @@ export function renderReport(input: ReportInput): string {
 
   <h2>Recording</h2>
   <div id="player"></div>
+  <script type="application/json" id="cast-data">${castContent.replace(/<\/script/gi, "<\\/script")}</script>
   <script>
-    AsciinemaPlayer.create(${JSON.stringify(castRel)}, document.getElementById("player"), {
-      autoPlay: false, speed: 1.5, idleTimeLimit: 2
-    });
+    (function () {
+      var castData = document.getElementById("cast-data").textContent;
+      AsciinemaPlayer.create({ data: castData, parser: "asciicast" }, document.getElementById("player"), {
+        autoPlay: false, speed: 1.5, idleTimeLimit: 2
+      });
+    })();
   </script>
 
   ${ctx.findings.length ? `<h2>Findings</h2><table><thead><tr><th>Status</th><th>Title</th><th>Detail</th></tr></thead><tbody>${findingRows}</tbody></table>` : ""}

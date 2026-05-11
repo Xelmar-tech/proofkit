@@ -130,15 +130,14 @@ const result = await proof.run({
       ],
     },
 
-    // 6. The customize screen asks each toggle as its own prompt. We use the
-    // FULL question form for the TypeScript prompt because the bare word
-    // "TypeScript" also appears in the defaults-menu sublabel (which is still
-    // in our accumulated buffer). v0 limitation: expectText scans the whole
-    // buffer, not "what's new since last gate" — so disambiguate explicitly.
+    // 6. The customize screen asks each toggle as its own prompt. We can wait
+    // for the bare word "TypeScript" because the virtual-screen model (xterm)
+    // has overwritten the defaults menu by this point — earlier mentions of
+    // "TypeScript" are no longer on screen.
     {
       id: "customize-screen",
       actions: [
-        { expectText: "Would you like to use TypeScript?", timeoutMs: 15_000 },
+        { expectText: "TypeScript", timeoutMs: 15_000 },
         { expectSnapshot: "05-customize-screen" },
       ],
     },

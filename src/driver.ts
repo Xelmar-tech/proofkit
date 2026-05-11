@@ -1,10 +1,17 @@
 import { spawn, type IPty } from "node-pty";
+// @xterm/headless's package.json points `module` at a path that doesn't
+// exist (lib/xterm.mjs); Node falls back to the CJS build, which doesn't
+// expose named exports via ESM `import`. Default-import + destructure
+// works for both CJS and the future-ESM build.
+import xtermHeadless from "@xterm/headless";
+const { Terminal } = xtermHeadless as unknown as {
+  Terminal: typeof import("@xterm/headless").Terminal;
+};
 import { performance } from "node:perf_hooks";
 import { createRequire } from "node:module";
 import { chmodSync, statSync } from "node:fs";
 import path from "node:path";
 import { CastWriter } from "./cast.ts";
-import { stripAnsi } from "./ansi.ts";
 import { KEY_SEQUENCES } from "./keystrokes.ts";
 import type { PressKey } from "./types.ts";
 
@@ -36,9 +43,9 @@ export interface TerminalDriver {
   pressEscape(): void;
   pressBackspace(): void;
   pressKey(key: PressKey): void;
-  /** Block until `text` appears in the ANSI-stripped buffer, or timeout. */
+  /** Block until `text` appears on the current virtual screen, or timeout. */
   waitForText(text: string, timeoutMs?: number): Promise<boolean>;
-  /** Return the last `rows` lines of the ANSI-stripped buffer. */
+  /** Return the current virtual screen as plain text (one line per row). */
   captureFrame(): string;
   /** Child exit code, or null if the child is still running. */
   exitCode(): number | null;
@@ -63,7 +70,16 @@ export function createDriver(opts: DriverOptions): TerminalDriver {
     cols: opts.cols,
     rows: opts.rows,
   });
-  let buffer = "";
+  // xterm.js parses every byte the child writes and maintains a virtual
+  // screen — CR/erase ops overwrite in place, alt-screen toggles correctly,
+  // scrollback rotates. We never touch the underlying byte stream for
+  // assertion or capture; we always read from the screen.
+  const terminal = new Terminal({
+    cols: opts.cols,
+    rows: opts.rows,
+    scrollback: 1000,
+    allowProposedApi: true,
+  });
   let exited: number | null = null;
 
   const pty: IPty = spawn(opts.command, opts.args, {
@@ -77,13 +93,27 @@ export function createDriver(opts: DriverOptions): TerminalDriver {
   cast.writeHeader();
 
   pty.onData((data: string) => {
-    buffer += data;
+    terminal.write(data);
     cast.writeEvent((performance.now() - startedAt) / 1000, data);
   });
 
   pty.onExit(({ exitCode }: { exitCode: number }) => {
     exited = exitCode;
   });
+
+  // Read the current visible viewport as plain text. We deliberately exclude
+  // scrollback — captureFrame and waitForText are about "what's on screen
+  // right now," not the full history. The cast file still records everything.
+  const readScreen = (): string => {
+    const buf = terminal.buffer.active;
+    const top = buf.viewportY;
+    const lines: string[] = [];
+    for (let y = 0; y < opts.rows; y++) {
+      const line = buf.getLine(top + y);
+      lines.push(line ? line.translateToString(true) : "");
+    }
+    return lines.join("\n").replace(/\s+$/, "");
+  };
 
   return {
     typeText: (s) => pty.write(s),
@@ -95,17 +125,14 @@ export function createDriver(opts: DriverOptions): TerminalDriver {
     waitForText: async (text, timeoutMs = 15_000) => {
       const deadline = Date.now() + timeoutMs;
       while (Date.now() < deadline) {
-        if (stripAnsi(buffer).includes(text)) return true;
-        if (exited !== null) return stripAnsi(buffer).includes(text);
+        if (readScreen().includes(text)) return true;
+        if (exited !== null) return readScreen().includes(text);
         await new Promise((r) => setTimeout(r, 100));
       }
       return false;
     },
 
-    captureFrame: () => {
-      const lines = stripAnsi(buffer).split("\n");
-      return lines.slice(-opts.rows).join("\n");
-    },
+    captureFrame: () => readScreen(),
 
     exitCode: () => exited,
 
@@ -118,6 +145,11 @@ export function createDriver(opts: DriverOptions): TerminalDriver {
         }
       }
       await new Promise((r) => setTimeout(r, 100));
+      try {
+        terminal.dispose();
+      } catch {
+        // already disposed — fine
+      }
     },
   };
 }

@@ -74,6 +74,53 @@ test("snapshot: mutated snapshot file produces mismatch + diff", async () => {
   ).toBe(true);
 });
 
+test("snapshot: in-place \\r redraw shows only the final state", async () => {
+  const root = mkdtempSync(path.join(tmpRoot, "redraw-"));
+  const proof = defineProof({
+    id: "redraw",
+    title: "redraw test",
+    cwd: import.meta.dirname,
+    handoffRoot: root,
+    width: 80,
+    height: 24,
+  });
+
+  process.env["PROOFKIT_UPDATE_SNAPSHOTS"] = "1";
+  try {
+    const result = await proof.run({
+      launch: {
+        command: "bun",
+        args: [
+          "run",
+          path.join(import.meta.dirname, "fixtures", "redraw.ts"),
+        ],
+      },
+      steps: [
+        {
+          id: "wait-final",
+          actions: [
+            { expectText: "status: done" },
+            { expectSnapshot: "redraw" },
+          ],
+        },
+      ],
+      verify: () => {},
+    });
+    expect(result.status).toBe("pass");
+
+    const snap = readFileSync(
+      path.join(root, "__snapshots__", "redraw.txt"),
+      "utf-8",
+    );
+    // The screen model should show only the final state, NOT all three.
+    expect(snap).toContain("status: done");
+    expect(snap).not.toContain("status: starting");
+    expect(snap).not.toContain("status: working");
+  } finally {
+    delete process.env["PROOFKIT_UPDATE_SNAPSHOTS"];
+  }
+});
+
 test("snapshot: PROOFKIT_UPDATE_SNAPSHOTS rewrites stale snapshot", async () => {
   const root = mkdtempSync(path.join(tmpRoot, "case3-"));
 

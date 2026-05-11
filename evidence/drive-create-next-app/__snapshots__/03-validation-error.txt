@@ -1,0 +1,5 @@
+Need to install the following packages:
+create-next-app@<version>
+Ok to proceed? (y) y
+? What is your project named? › tui proof kit
+› Invalid project name: name can only contain URL-friendly characters
