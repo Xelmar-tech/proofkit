@@ -1,12 +1,16 @@
 name: Deploy Docs
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
     paths:
       - "apps/fumadocs/**"
       - "packages/**"
       - "docs/**"
+      - ".github/workflows/docs-deploy.yml"
+      - "package.json"
+      - "pnpm-lock.yaml"
 
 jobs:
   deploy-docs:
