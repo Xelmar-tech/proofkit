@@ -15,6 +15,9 @@ on:
 jobs:
   deploy-docs:
     runs-on: ubuntu-latest
+    environment:
+      name: docs
+      url: https://proofkit-docs.pages.dev
     permissions:
       contents: read
       deployments: write
@@ -27,9 +30,12 @@ jobs:
           cache: "pnpm"
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter fumadocs build
+      - name: Prepare Cloudflare Pages artifact
+        run: |
+          test -f apps/fumadocs/.output/public/index.html || cp apps/fumadocs/.output/public/_shell.html apps/fumadocs/.output/public/index.html
       - name: Publish to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy apps/fumadocs/.output --project-name=proofkit-docs
+          command: pages deploy apps/fumadocs/.output/public --project-name=proofkit-docs
