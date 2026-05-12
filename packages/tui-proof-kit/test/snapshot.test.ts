@@ -10,6 +10,10 @@ afterAll(() => {
 });
 
 const fixturePath = path.join(import.meta.dirname, "fixtures", "hello.ts");
+const runFixture = (filePath: string): [string, string[]] => [
+  process.execPath,
+  ["--experimental-strip-types", filePath],
+];
 
 async function runOnce(handoffRoot: string) {
   const proof = defineProof({
@@ -22,7 +26,7 @@ async function runOnce(handoffRoot: string) {
   });
 
   return proof.run({
-    launch: { command: "bun", args: ["run", fixturePath] },
+    launch: { command: runFixture(fixturePath)[0], args: runFixture(fixturePath)[1] },
     steps: [
       {
         id: "wait-hello",
@@ -73,8 +77,8 @@ test("snapshot: in-place \\r redraw shows only the final state", async () => {
   try {
     const result = await proof.run({
       launch: {
-        command: "bun",
-        args: ["run", path.join(import.meta.dirname, "fixtures", "redraw.ts")],
+        command: runFixture(path.join(import.meta.dirname, "fixtures", "redraw.ts"))[0],
+        args: runFixture(path.join(import.meta.dirname, "fixtures", "redraw.ts"))[1],
       },
       steps: [
         {
