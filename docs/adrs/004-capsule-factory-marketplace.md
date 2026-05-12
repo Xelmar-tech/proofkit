@@ -22,7 +22,7 @@ Add proofkit as a capsule-factory marketplace entry by **submitting a PR to caps
 ```json
 {
   "name": "proofkit",
-  "source": "https://github.com/capxul/proofkit",
+  "source": "https://github.com/Xelmar-tech/proofkit",
   "description": "Drive terminal apps, record sessions, produce evidence packs. Scaffold-proof skill for coding agents."
 }
 ```

@@ -1,9 +1,9 @@
-# tui-proof-kit
+# @capxul/tui-test-kit
 
 Drive terminal apps, record sessions, produce evidence packs.
 
 ```bash
-npm install tui-proof-kit
+npm install @capxul/tui-test-kit
 ```
 
 **Requirements:** Node.js >= 22. `node-pty` is a native C++ addon — you need a C++ compiler and `node-gyp` available (Xcode CLI tools on macOS, `build-essential` on Linux, Visual Studio Build Tools on Windows).
@@ -11,7 +11,7 @@ npm install tui-proof-kit
 ## Quick start
 
 ```ts
-import { defineProof } from "tui-proof-kit";
+import { defineProof } from "@capxul/tui-test-kit";
 
 const proof = defineProof({
   id: "hello",
@@ -36,4 +36,4 @@ await proof.run({
 });
 ```
 
-Full docs: [proofkit.capxul.com](https://proofkit.capxul.com)
+Full docs: [proofkit-docs.pages.dev](https://proofkit-docs.pages.dev)

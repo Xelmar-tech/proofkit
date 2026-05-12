@@ -37,10 +37,10 @@ You write a **proof file** — a TypeScript script that defines `defineProof({ .
 
 ```bash
 # Install
-npm install tui-proof-kit
+npm install @capxul/tui-test-kit
 
 # Scaffold a proof for your TUI
-npx tui-proof-kit scaffold-proof ./my-cli.ts
+npx @capxul/tui-test-kit scaffold-proof ./my-cli.ts
 
 # Run it (first time: record snapshots)
 PROOFKIT_UPDATE_SNAPSHOTS=1 node --experimental-strip-types proofs/my-cli.proof.ts

@@ -164,8 +164,8 @@ plugin's `name` matches its `.claude-plugin/plugin.json#name`.
 The Claude plugin does **not** depend on `tui-proof-kit` at runtime.
 It only generates a TS file that imports from `tui-proof-kit` when the
 user runs it. `plugin-shared` is the only runtime dependency.
-`tui-proof-kit` shows up only as a string literal in the template
-(`import { defineProof } from "tui-proof-kit";`).
+`@capxul/tui-test-kit` shows up only as a string literal in the template
+(`import { defineProof } from "@capxul/tui-test-kit";`).
 
 This avoids version-coupling the plugin to the framework: the user's
 project picks the framework version via its own `package.json`, the
@@ -226,7 +226,7 @@ A reviewer with a fresh clone of proofkit can do this end-to-end:
 3. `/plugin install proofkit-claude@proofkit` installs the plugin.
 4. In any other repo, typing `/scaffold-proof ./some-cli.ts` produces
    a file at `proofs/some-cli.proof.ts` whose first line is
-   `import { defineProof } from "tui-proof-kit";` and whose body is a
+   `import { defineProof } from "@capxul/tui-test-kit";` and whose body is a
    minimal but valid `defineProof({ ... }).run({ ... })` call.
 5. `node --experimental-strip-types proofs/some-cli.proof.ts` runs
    without throwing on syntax or import errors. (It may fail to drive

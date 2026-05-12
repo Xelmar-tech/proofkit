@@ -12,15 +12,11 @@ The full source is at `packages/tui-proof-kit/examples/drive-create-next-app.ts`
 
 ## What this proof does
 
-```mermaid
-flowchart LR
-    A[npx prompt] --> B[Project name]
-    B --> C[Invalid name?]
-    C -->|yes| D[Recover]
-    D --> B
-    C -->|no| E[Defaults menu]
-    E --> F[Customize screen]
-    F --> G[Done]
+```
+npx prompt  →  Project name  →  Invalid name?
+                                   ├─ yes →  Recover (backspace + retype)  ─┐
+                                   │         ←──────────────────────────────┘
+                                   └─ no  →  Defaults menu  →  Customize screen  →  Done
 ```
 
 It exercises every public framework feature:

@@ -97,8 +97,8 @@ Per briefing §3.2. Required core fields plus the Codex-specific
     "email": "aaron@capxul.com",
     "url": "https://capxul.com"
   },
-  "homepage": "https://github.com/capxul/proofkit",
-  "repository": "https://github.com/capxul/proofkit",
+  "homepage": "https://github.com/Xelmar-tech/proofkit",
+  "repository": "https://github.com/Xelmar-tech/proofkit",
   "license": "MIT",
   "keywords": ["tui", "testing", "snapshot", "proofkit"],
   "interface": {
@@ -110,7 +110,7 @@ Per briefing §3.2. Required core fields plus the Codex-specific
     "defaultPrompt": "Scaffold a proof file for the TUI at ./my-cli.ts",
     "composerIcon": "./assets/icon.png",
     "logo": "./assets/logo.png",
-    "websiteURL": "https://proofkit.capxul.com"
+    "websiteURL": "https://proofkit-docs.pages.dev"
   }
 }
 ```

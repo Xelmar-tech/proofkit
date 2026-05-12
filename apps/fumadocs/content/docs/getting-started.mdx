@@ -7,11 +7,11 @@ icon: Play
 ## Installation
 
 ```bash
-npm install tui-proof-kit
+npm install @capxul/tui-test-kit
 # or
-pnpm add tui-proof-kit
+pnpm add @capxul/tui-test-kit
 # or
-yarn add tui-proof-kit
+yarn add @capxul/tui-test-kit
 ```
 
 Requirements: **Node.js >= 22** with `--experimental-strip-types` support for running `.ts` proof files directly.
@@ -38,7 +38,7 @@ rl.question("What is your name? ", (name) => {
 Now write a proof for it. Create `proofs/hello.proof.ts`:
 
 ```ts title="proofs/hello.proof.ts"
-import { defineProof } from "tui-proof-kit";
+import { defineProof } from "@capxul/tui-test-kit";
 
 const proof = defineProof({
   id: "hello",

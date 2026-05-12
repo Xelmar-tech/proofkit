@@ -12,7 +12,7 @@
 
 M5b of the proofkit monorepo migration calls for deploy infrastructure: a public docs site, CI that runs lint+typecheck+test+build on every PR, and an npm publish pipeline triggered by changeset version commits.
 
-The GitHub remote for proofkit (`github.com/capxul/proofkit`) does not yet exist. This ADR defines the deploy target and CI shape; the actual remote creation + workflow enablement happens when the repo is created.
+The GitHub remote for proofkit is `github.com/Xelmar-tech/proofkit`. This ADR defines the deploy target and CI shape; workflow activation depends on the required repository secrets being configured.
 
 ## Decision (proposed)
 
@@ -32,7 +32,7 @@ Deploy the Fumadocs site (`apps/fumadocs/`) to **Cloudflare Pages** via the Wran
 
 Cloudflare Pages is the default for Capxul infrastructure. The Fumadocs site uses Nitro under the hood (via Tanstack Start), and Nitro has a first-class `cloudflare-pages` preset that deploys SSR routes as Cloudflare Workers/Functions. Build output goes to `.output/` — the same as any Nitro build.
 
-**Custom domain:** `proofkit.capxul.com` (deferred — set up when Capxul's DNS is configured). Until then, the Cloudflare-generated `*.pages.dev` URL is the public face.
+**Custom domain:** deferred. Until DNS is configured, the Cloudflare-generated `*.pages.dev` URL is the public face.
 
 ### CI: GitHub Actions
 
@@ -145,8 +145,8 @@ jobs:
 
 ### Prerequisites for activation
 
-1. GitHub remote `capxul/proofkit` must exist (create via GitHub UI or `gh repo create`).
-2. `NPM_TOKEN` secret added to repo (npm access token with publish permission for `tui-proof-kit`).
+1. GitHub remote `Xelmar-tech/proofkit` must exist.
+2. `NPM_TOKEN` secret added to repo (npm access token with publish permission for `@capxul/tui-test-kit`).
 3. Cloudflare Pages project `proofkit-docs` created in the Capxul Cloudflare account.
 4. `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` secrets added to the GitHub repo.
 
@@ -154,7 +154,7 @@ jobs:
 
 1. Opening a PR against `main` triggers CI: lint + typecheck + test + build all pass (or fail with clear output).
 2. Pushing a changeset version commit to `main` triggers the release workflow (dry-run until `NPM_TOKEN` is configured).
-3. The docs site is live at the Cloudflare Pages URL (`proofkit-docs.pages.dev` or `proofkit.capxul.com` once DNS is set up).
+3. The docs site is live at the Cloudflare Pages URL (`proofkit-docs.pages.dev` or a custom domain once DNS is set up).
 4. `pnpm check` and `pnpm turbo check-types` are clean on `main`.
 
 ## Consequences
@@ -174,5 +174,5 @@ jobs:
 **Neutral**
 
 - Custom domain is deferred. The Cloudflare Pages subdomain is the public face for v0.
-- GitHub remote doesn't exist yet — workflows will sit dormant until the repo is created and pushed.
+- GitHub workflows require repository secrets before release and docs deploy can complete.
 ```

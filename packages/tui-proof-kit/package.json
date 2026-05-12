@@ -1,5 +1,5 @@
 {
-  "name": "tui-proof-kit",
+  "name": "@capxul/tui-test-kit",
   "version": "0.2.0",
   "description": "Drive terminal apps, record sessions, produce evidence packs.",
   "keywords": [

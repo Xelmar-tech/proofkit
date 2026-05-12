@@ -27,7 +27,7 @@ You are an expert at writing and debugging proof files for the `tui-proof-kit` f
 ### Proof file template
 
 ```ts
-import { defineProof } from "tui-proof-kit";
+import { defineProof } from "@capxul/tui-test-kit";
 
 const proof = defineProof({
   id: "unique-id", // stable, used in filenames
