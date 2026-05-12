@@ -1,6 +1,6 @@
 {
   "name": "tui-proof-kit",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Drive terminal apps, record sessions, produce evidence packs.",
   "keywords": [
     "asciinema",
