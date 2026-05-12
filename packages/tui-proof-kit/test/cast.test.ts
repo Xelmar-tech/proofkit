@@ -9,6 +9,11 @@ afterAll(() => {
   rmSync(tmpRoot, { recursive: true, force: true });
 });
 
+const runFixture = (name: string): [string, string[]] => [
+  process.execPath,
+  ["--experimental-strip-types", path.join(import.meta.dirname, "fixtures", name)],
+];
+
 test("cast file has valid v2 header and well-formed event lines", async () => {
   const proof = defineProof({
     id: "cast",
@@ -21,8 +26,8 @@ test("cast file has valid v2 header and well-formed event lines", async () => {
 
   await proof.run({
     launch: {
-      command: "bun",
-      args: ["run", path.join(import.meta.dirname, "fixtures", "hello.ts")],
+      command: runFixture("hello.ts")[0],
+      args: runFixture("hello.ts")[1],
     },
     steps: [{ id: "wait", actions: [{ expectText: "hello" }] }],
     verify: () => {},

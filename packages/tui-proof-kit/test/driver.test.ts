@@ -17,11 +17,16 @@ function cleanEnv(): Record<string, string> {
   return env;
 }
 
+const runFixture = (name: string): [string, string[]] => [
+  process.execPath,
+  ["--experimental-strip-types", path.join(import.meta.dirname, "fixtures", name)],
+];
+
 test("driver spawns child, captures output, surfaces exit code", async () => {
   const castPath = path.join(tmpRoot, "hello.cast");
   const d = createDriver({
-    command: "bun",
-    args: ["run", path.join(import.meta.dirname, "fixtures", "hello.ts")],
+    command: runFixture("hello.ts")[0],
+    args: runFixture("hello.ts")[1],
     cwd: import.meta.dirname,
     env: cleanEnv(),
     cols: 80,
@@ -44,8 +49,8 @@ test("driver spawns child, captures output, surfaces exit code", async () => {
 
 test("driver stop() is idempotent on an already-exited child", async () => {
   const d = createDriver({
-    command: "bun",
-    args: ["run", path.join(import.meta.dirname, "fixtures", "hello.ts")],
+    command: runFixture("hello.ts")[0],
+    args: runFixture("hello.ts")[1],
     cwd: import.meta.dirname,
     env: cleanEnv(),
     cols: 80,
@@ -63,8 +68,8 @@ test("driver stop() is idempotent on an already-exited child", async () => {
 
 test("driver captureFrame returns last N lines of stripped buffer", async () => {
   const d = createDriver({
-    command: "bun",
-    args: ["run", path.join(import.meta.dirname, "fixtures", "hello.ts")],
+    command: runFixture("hello.ts")[0],
+    args: runFixture("hello.ts")[1],
     cwd: import.meta.dirname,
     env: cleanEnv(),
     cols: 80,

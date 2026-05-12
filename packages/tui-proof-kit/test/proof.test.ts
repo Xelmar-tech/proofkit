@@ -9,6 +9,11 @@ afterAll(() => {
   rmSync(tmpRoot, { recursive: true, force: true });
 });
 
+const runFixture = (name: string): [string, string[]] => [
+  process.execPath,
+  ["--experimental-strip-types", path.join(import.meta.dirname, "fixtures", name)],
+];
+
 test("defineProof drives echo-prompt and produces a complete evidence pack", async () => {
   const root = mkdtempSync(path.join(tmpRoot, "echo-"));
   const proof = defineProof({
@@ -22,8 +27,8 @@ test("defineProof drives echo-prompt and produces a complete evidence pack", asy
 
   const result = await proof.run({
     launch: {
-      command: "bun",
-      args: ["run", path.join(import.meta.dirname, "fixtures", "echo-prompt.ts")],
+      command: runFixture("echo-prompt.ts")[0],
+      args: runFixture("echo-prompt.ts")[1],
     },
     steps: [
       {
@@ -71,8 +76,8 @@ test("defineProof reports `blocked` when expectText times out", async () => {
 
   const result = await proof.run({
     launch: {
-      command: "bun",
-      args: ["run", path.join(import.meta.dirname, "fixtures", "hello.ts")],
+      command: runFixture("hello.ts")[0],
+      args: runFixture("hello.ts")[1],
     },
     steps: [
       {
@@ -103,8 +108,8 @@ test("defineProof surfaces verify failures as `fail`", async () => {
 
   const result = await proof.run({
     launch: {
-      command: "bun",
-      args: ["run", path.join(import.meta.dirname, "fixtures", "hello.ts")],
+      command: runFixture("hello.ts")[0],
+      args: runFixture("hello.ts")[1],
     },
     steps: [{ id: "wait", actions: [{ expectText: "hello" }] }],
     verify: () => {
