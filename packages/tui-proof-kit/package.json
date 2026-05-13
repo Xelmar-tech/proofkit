@@ -31,6 +31,7 @@
   "scripts": {
     "build": "tsup src/index.ts --format esm --dts --clean",
     "test": "vitest run",
+    "coverage": "vitest run --coverage",
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
@@ -40,6 +41,7 @@
   "devDependencies": {
     "@tui-proof-kit/config": "workspace:*",
     "@types/node": "^25.7.0",
+    "@vitest/coverage-v8": "^4.1.6",
     "tsup": "^8.5.1",
     "typescript": "^6",
     "vitest": "^4.1.6"
