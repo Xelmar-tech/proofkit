@@ -20,7 +20,7 @@ jobs:
       - run: pnpm turbo test
       - run: pnpm turbo run coverage
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: success() || failure()
         with:
           name: coverage-report
           path: packages/tui-proof-kit/coverage/
